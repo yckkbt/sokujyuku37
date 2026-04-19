@@ -157,7 +157,7 @@
     <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
     <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
     <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
-    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜AIと復習</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
   </div>
 </div>
 
@@ -426,47 +426,55 @@
         <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
       </div>
 
-      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜AIと復習へ →</button>
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
     </div>
   </div>
 
   <!-- STEP 4 -->
   <div class="step-section" id="step3">
     <div class="card">
-      <div class="card-title"><span>🤖</span> Step 4｜AIと復習</div>
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
       <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
         <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
         <div style="font-size:20px; font-weight:900; color:#222;">体内時計 生活習慣で守る</div>
       </div>
       <div class="step-intro">
-        <strong>AIに質問して復習しよう！</strong>
-        わからなかった単語・イディオム・文法について何でも質問できます。日本語でも英語でもOK。
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
       </div>
-      <div class="ai-chat-area">
-        <div class="ai-messages" id="aiMessages">
-          <div class="ai-msg">
-            <div class="avatar">AI</div>
-            <div class="bubble">
-              こんにちは！Unit 37「Circadian Rhythm」について、何でも質問してください😊<br><br>
-              例えば：<br>
-              ・「take it for granted の使い方を教えて」<br>
-              ・「非制限用法の which をもう一度説明して」<br>
-              ・「prevent A from ~ing の例文を作って」
-            </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">14</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
           </div>
         </div>
-        <div class="ai-input-row">
-          <textarea class="ai-input" id="aiInput" placeholder="質問を入力してください..." rows="2" onkeydown="handleEnter(event)"></textarea>
-          <button class="ai-send" id="aiSendBtn" onclick="sendMessage()">➤</button>
-        </div>
       </div>
-      <div style="margin-top:20px;">
-        <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
       </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
     </div>
     <div class="completion-banner" id="completionBanner" style="display:none;">
       <h2>🎉 Unit 37 完了！</h2>
-      <p>お疲れ様でした。体内時計とサーカディアンリズムについて学習しました。<br>次のユニットへ進みましょう！</p>
+      <p>お疲れ様でした。サーカディアンリズム（体内時計）について学習しました。<br>次のユニットへ進みましょう！</p>
     </div>
   </div>
 
@@ -543,70 +551,32 @@
     result.scrollIntoView({ behavior: 'smooth' });
   }
 
-  const SYSTEM_PROMPT = `あなたは英語学習のサポーターです。
-現在学習中の教材は「Unit 37: Circadian Rhythm（サーカディアンリズム）」です。
-
-本文（英語）:
-①Our bodies have an internal clock that keeps our internal systems under control. Part of this clock is the circadian rhythms, which are 24-hour cycles such as our sleep-wake cycle. The word circadian is derived from the Latin phrase circa diem, which means "around a day." A group of scientists won the Nobel Prize in 2017 on account of their research into circadian rhythms.
-②Circadian rhythms help to make sure that our body is doing the right things at the right times. The sleep-wake cycle plays a role in almost all of our physical systems. Our body produces proteins to match the times we eat meals. It also regulates hormones to keep up with our energy needs throughout the day.
-③Some activities we engage in today can disturb the circadian rhythms. The main one is using a computer or other device that gives off blue light. Our bodies are very sensitive to this kind of light. Natural light from the sun is what our body needs to feel awake, but blue light can cause the circadian rhythm to shift, which prevents us from getting enough sleep at night.
-④Researchers say that we should as much as possible eat, be active, and sleep at the same time every day. But if you must use a computer or smartphone at night, try not to stay up too late, and make it a rule to stop using it at least an hour before you go to sleep. We cannot take it for granted that our bodies will behave the way we expect them to.
-
-重要イディオム: under control / be derived from / on account of / make sure that / play a role in / keep up with / engage in / give off / prevent A from ~ing / as much as possible / stay up / make it a rule to / take it for granted
-
-以下の役割を果たしてください：
-- 学習者の質問に日本語でわかりやすく答える
-- イディオム・単語・文法の説明は例文を使って丁寧に
-- 本文の内容に関する質問にも的確に答える
-- 励ましながら学習をサポートする
-- 回答は簡潔に（200文字以内を目安に）`;
-
-  const conversationHistory = [];
-  let msgCounter = 0;
-
-  async function sendMessage() {
-    const input = document.getElementById('aiInput');
-    const text = input.value.trim();
-    if (!text) return;
-    addMessage('user', text);
-    input.value = '';
-    conversationHistory.push({ role: 'user', content: text });
-    document.getElementById('aiSendBtn').disabled = true;
-    const loadingId = addMessage('assistant', '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>');
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: conversationHistory })
-      });
-      const data = await response.json();
-      const reply = data.content?.map(c => c.text || '').join('') || 'エラーが発生しました。';
-      conversationHistory.push({ role: 'assistant', content: reply });
-      updateMessage(loadingId, reply);
-    } catch (e) { updateMessage(loadingId, 'エラーが発生しました。もう一度試してください。'); }
-    document.getElementById('aiSendBtn').disabled = false;
-  }
-
-  function addMessage(role, html) {
-    const id = 'msg-' + (++msgCounter);
-    const container = document.getElementById('aiMessages');
-    const div = document.createElement('div');
-    div.className = 'ai-msg ' + (role === 'user' ? 'user' : '');
-    div.id = id;
-    div.innerHTML = `<div class="avatar">${role === 'user' ? 'あ' : 'AI'}</div><div class="bubble">${html}</div>`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    return id;
-  }
-
-  function updateMessage(id, text) {
-    const el = document.getElementById(id);
-    if (el) { el.querySelector('.bubble').textContent = text; document.getElementById('aiMessages').scrollTop = 99999; }
-  }
-
-  function handleEnter(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'under control',ja:'制御下に；管理下に'},
+    {en:'be derived from ~',ja:'〜に由来する'},
+    {en:'on account of ~',ja:'〜のために'},
+    {en:'make sure (that ...)',ja:'…であることを確認する；…を確実にする'},
+    {en:'play a part [role] in ~',ja:'〜において役割を果たす'},
+    {en:'keep up with ~',ja:'〜に（遅れないで）ついていく'},
+    {en:'engage in ~',ja:'〜に従事する；〜に関与する'},
+    {en:'give off ~',ja:'〜（におい・熱・光など）を発する'},
+    {en:'prevent ~ from ...ing',ja:'〜が…するのを妨げる〔防ぐ〕'},
+    {en:'stay up',ja:'寝ないでいる；夜更かしをする'},
+    {en:'at least',ja:'少なくとも'},
+    {en:'as ~ as possible',ja:'できるだけ〜'},
+    {en:'make it a rule to do',ja:'…することにしている'},
+    {en:'take it for granted that ...',ja:'…は当然だと思う'}
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
 </script>
 
 </body>
